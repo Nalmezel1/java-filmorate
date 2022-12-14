@@ -9,13 +9,13 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Data
-public class Film {
-    private long id;
+public class Film extends AbstractModel{
+
 
     @NotNull
     @NotEmpty(message = "название не может быть пустым")
     private String name;
-    @Size(min = 1, message = "название не может быть пустым")
+    @Size(min = 1, message = "описание не может быть пустым")
     @Size(max = 200, message = "максимальная длина описания — 200 символов")
     private String description;
 

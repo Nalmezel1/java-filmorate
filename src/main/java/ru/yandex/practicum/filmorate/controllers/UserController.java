@@ -15,48 +15,18 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-public class UserController {
-    private Map<Long, User> users = new HashMap<>();
-    long currentMaxId = 0;
+@RequestMapping("/users")
+public class UserController extends AbstractController<User> {
 
-    @PostMapping(value = "/users")
-    public User createUser(@Valid @RequestBody User user) {
-        user = checkUserName(user);
-
-        currentMaxId++;
-        user.setId(currentMaxId);
-
-        users.put(user.getId(), user);
-
-        log.info(String.format("Пользователь c user_id=%d создан", user.getId()));
-        log.debug(String.format("info пользователя = %s", user.toString()));
-        return user;
-    }
-
-    @PutMapping(value = "/users")
-    public User updateUser(@Valid @RequestBody User user) throws ValidationException {
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException(String.format("Пользователь с id= %d не найден", user.getId()));
-        }
-        user = checkUserName(user);
-
-        users.put(user.getId(), user);
-
-        log.info(String.format("Пользователь c user_id=%d обновлен", user.getId()));
-        log.debug(String.format("info пользователя = %s", user.toString()));
-        return user;
-    }
-
-    @GetMapping("/users")
-    public List<User> listAllUsers() {
-        return List.copyOf(users.values());
-    }
-
-    private User checkUserName(User user) {
+    @Override
+    public void validate(User user) throws ValidationException {
         if (user.getName() == null || user.getName().isEmpty()) {
             log.warn(String.format("Name пустой, присваивается занчение login: %s", user.getLogin()));
             user.setName(user.getLogin());
         }
-        return user;
+        if (!user.getEmail().contains("@") || user.getEmail().isEmpty()) {
+            throw new ValidationException("Не корректный email");
+        }
+
     }
 }
