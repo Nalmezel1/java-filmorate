@@ -17,41 +17,4 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-public abstract class AbstractController<T extends AbstractModel> {
-    private Map<Long, T> сontrollerMap = new HashMap<>();
-    private long currentMaxId = 0L;
-
-
-    @PostMapping
-    public T create(@Valid @RequestBody T item) throws ValidationException {
-
-        validate(item);
-        currentMaxId++;
-        item.setId(currentMaxId);
-
-        сontrollerMap.put(item.getId(), item);
-
-        log.info(String.format("Элемент создан", item.getId()));
-        log.debug(String.format("info = %s", item.toString()));
-        return item;
-    }
-
-    @PutMapping
-    public T update (@Valid @RequestBody T item) throws ValidationException{
-        validate(item);
-        if (!сontrollerMap.containsKey(item.getId())) {
-            throw new ValidationException(String.format("Элемент с id= %d не найден", item.getId()));
-        }
-        сontrollerMap.put(item.getId(), item);
-        log.info(String.format("Элемент обновлен", item.getId()));
-        log.debug(String.format("info = %s", item.toString()));
-        return item;
-    }
-
-    @GetMapping
-    public List<T> getAll() {
-        return List.copyOf(сontrollerMap.values());
-    }
-
-    public void validate(T item) throws ValidationException{}
-}
+public abstract class AbstractController<T extends AbstractModel> {}

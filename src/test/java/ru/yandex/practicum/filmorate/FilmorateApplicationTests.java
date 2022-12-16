@@ -12,6 +12,12 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import org.junit.jupiter.api.function.Executable;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
@@ -22,11 +28,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 class FilmorateApplicationTests {
 
+
+
 	@Autowired
 	private static User user;
 	private static Film film;
-	UserController userController = new UserController();
-	FilmController filmController = new FilmController();
+	UserStorage userStorage = new InMemoryUserStorage();
+	FilmStorage filmStorage = new InMemoryFilmStorage();
+    FilmService filmService = new FilmService(filmStorage,userStorage);
+    UserService userService = new UserService(userStorage);
+	UserController userController = new UserController(userService);
+	FilmController filmController = new FilmController(filmService);
 
 	@BeforeEach
 	void setUp() {
