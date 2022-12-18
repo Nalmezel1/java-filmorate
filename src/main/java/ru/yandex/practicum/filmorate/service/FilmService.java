@@ -1,60 +1,86 @@
 package ru.yandex.practicum.filmorate.service;
 
 
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
     final LocalDate MIN_RELEASE_DAY=LocalDate.of(1895,12,28);
     private final FilmStorage filmStorage;
-
     private final UserStorage userStorage;
+    private final UserService userService;
+    private final GenreService genreService;
+    private final FilmsGenresServiсe filmsGenresServiсe;
+
+    private final LikesStorage likesStorage;
+
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("userDbStorage") UserStorage userStorage, UserService userService, GenreService genreService, FilmsGenresServiсe filmsGenresServiсe, LikesStorage likesStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.userService = userService;
+        this.genreService = genreService;
+        this.filmsGenresServiсe = filmsGenresServiсe;
+        this.likesStorage = likesStorage;
     }
 
-    public Film createFilm (Film film) throws ValidationException {
+    public Film createFilm (Film film)  {
         validate(film);
-        return filmStorage.create(film);
+        Film newfilm = filmStorage.create((film));
+        genreService.writeFilmGenres(newfilm.getId(),newfilm.getGenres());
+
+        return newfilm;
     }
 
-    public Film updateFilm (Film film) throws ValidationException {
-        if (isFilmExistInStorage(film.getId())) {
+    public Film updateFilm (Film film) {
+        if (filmStorage.isFilmExist(film.getId())) {
+            System.out.println("update");
             validate(film);
-            return filmStorage.update(film);
+            System.out.println("rate переменной - " + film.getRate());
+            System.out.println("rate переменной - " +filmStorage.get(film.getId()).getRate());
+
+            filmStorage.update(film);
+            System.out.println("UPDATE");
+            System.out.println("rate переменной - " + film.getRate());
+            System.out.println("rate переменной - " +filmStorage.get(film.getId()).getRate());
+            genreService.addFilmGenres(film.getId(), film.getGenres());
+            return getFilm(film.getId());
         } else {
             throw new NotFoundException("фильм с id" + film.getId() + " не существует");
         }
     }
 
     public void deleteFilm (long  id) {
-        if (isFilmExistInStorage(id)) {
+        if (filmStorage.isFilmExist(id)) {
             filmStorage.remove(id);
+            genreService.deleteFilmGenres(id);
         } else {
             throw new NotFoundException("фильм с id" + id + " не существует");
         }
     }
 
     public Film getFilm (long id){
-        if (isFilmExistInStorage(id)) {
-            return filmStorage.get(id);
+        if (filmStorage.isFilmExist(id)) {
+            Film film = filmStorage.get(id);
+            List<Genre> genres = genreService.getFilmGenres(film.getId());
+            if (genres.size() > 0) {
+                film.setGenres(genres);
+            }
+            return film;
         } else {
             throw new NotFoundException("фильм с id" + id + " не существует");
         }
@@ -64,57 +90,19 @@ public class FilmService {
         return filmStorage.getAll();
     }
 
-    public void addLike(Long filmId, Long userId) throws ValidationException {
-        Film film = getFilm(filmId);
-        if(isUserExistInStorage(userId)){
-            film.addLike(userId);
-            updateFilm(film);
-        }else{
-            throw new NotFoundException("Этот пользователь не существует");
-        }
-    }
-
-    public void removeLike(Long filmId, Long userId) throws NotFoundException, ValidationException {
-        Film film = getFilm(filmId);
-        if (!film.getLikes().contains(userId)) {
-            throw new NotFoundException("Этот пользователь не лайкал фильм");
-        }
-        film.removeLike(userId);
-        updateFilm(film);
-    }
-
-
     public List<Film> getPopular(int count) {
-        List<Film> sortedListForFilms = filmStorage.getAll().stream()
-                .sorted(Comparator.comparing(x->-x.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
-        return sortedListForFilms;
-    }
+
+        return filmStorage.getPopularFilms(count);
+
+   }
 
 
-    public void validate(Film film) throws ValidationException {
+    @SneakyThrows
+    public void validate(Film film)  {
         if (film.getReleaseDate().isBefore(MIN_RELEASE_DAY)){
-            throw new ValidationException
-                    (String.format("Неверная дата релиза", film.getId()));
+            throw new ValidationException("Неверная дата релиза");
         }
     }
 
-    public boolean isFilmExistInStorage(long id) {
-        List<Film> allFilms = filmStorage.getAll();
-        if (allFilms.stream().anyMatch(s->s.getId() == id)) {
 
-            return true;
-        } else {
-            return false;
-        }
-    }
-    public boolean isUserExistInStorage(long id) {
-        List<User> allUsers = userStorage.getAll();
-        if (allUsers.stream().anyMatch(s->s.getId() == id)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

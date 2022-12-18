@@ -1,16 +1,16 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.storage.inMemoryStorege;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
 
     HashMap<Long, Film> storage = new HashMap<>();
 
@@ -52,6 +52,31 @@ public class InMemoryFilmStorage implements FilmStorage{
     @Override
     public List<Film> getAll() {
         return new ArrayList<>(storage.values());
+    }
+
+    /*@Override
+    public void addLike(Long userId, Long userId1) {
+
+    }
+
+    @Override
+    public void removeLike(Long userId, Long userId1) {
+
+    }*/
+
+    @Override
+    public List<Film> getPopularFilms(int count) {
+        return null;
+    }
+
+    @Override
+    public boolean isFilmExist(Long id) {
+        return false;
+    }
+
+    @Override
+    public boolean iiLikeExist(Long filmId, Long userId) {
+        return false;
     }
 
 

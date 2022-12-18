@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.user;
+package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -19,5 +19,7 @@ public interface UserStorage {
     User get(Long id);
 
     List<User> getAll();
+
+    boolean isExistInStorage (Long id);
 
 }

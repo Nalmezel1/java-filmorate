@@ -1,9 +1,9 @@
-package ru.yandex.practicum.filmorate.storage.user;
+package ru.yandex.practicum.filmorate.storage.inMemoryStorege;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage implements UserStorage {
     Map<Long, User> storage = new HashMap<>();
 
     private long currentMaxId = 0L;
@@ -51,5 +51,10 @@ public class InMemoryUserStorage implements UserStorage{
 
     public List<User> getAll() {
         return new ArrayList<>(storage.values());
+    }
+
+    @Override
+    public boolean isExistInStorage(Long id) {
+        return false;
     }
 }

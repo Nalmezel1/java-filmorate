@@ -35,8 +35,8 @@ class FilmorateApplicationTests {
 	private static Film film;
 	UserStorage userStorage = new InMemoryUserStorage();
 	FilmStorage filmStorage = new InMemoryFilmStorage();
-    FilmService filmService = new FilmService(filmStorage,userStorage);
-    UserService userService = new UserService(userStorage);
+	FilmService filmService = new FilmService(filmStorage,userStorage);
+	UserService userService = new UserService(userStorage);
 	UserController userController = new UserController(userService);
 	FilmController filmController = new FilmController(filmService);
 
@@ -126,5 +126,3 @@ class FilmorateApplicationTests {
 		assertEquals("Неверная дата релиза", exception.getMessage());
 	}
 }
-
-
