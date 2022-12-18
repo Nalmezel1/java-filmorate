@@ -68,12 +68,6 @@ public class GenreService {
     }
 
     private void checkGenreId(long id) {
-
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        System.out.println(id);
-        System.out.println(checkGenres(id));
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-
         if (id < 0 || checkGenres(id)) {
             throw new IdNegativeException("нверный id");
         }

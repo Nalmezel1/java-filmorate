@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -102,12 +103,13 @@ public class FilmDbStorage  implements FilmStorage {
     @Override
     public List<Film> getAll() {
         String sql =
-                "SELECT f.film_id, f.film_name, f.description, f.release_date, f.duration,f.rate, f.Mpa_id, m.rating_name,STRING_AGG(CONCAT(fg.genres_id, '_', g.name_genre), ', ') AS GENRES  " +
+                "SELECT f.film_id, f.film_name, f.description, f.release_date, f.duration,f.rate, f.Mpa_id, m.rating_name, fg.genres_id, g.name_genre  " +
                         "FROM films f " +
                         "LEFT JOIN mpa_rating AS m ON m.mpa_id = f.Mpa_id " +
                         "LEFT JOIN films_genres AS fg ON f.film_id = fg.film_id " +
                         "LEFT JOIN genres AS g ON g.genre_id = fg.genres_id " +
                         "GROUP BY f.film_id;";
+
         return jdbcTemplate.query(sql,(rs, rowNum) -> parseFilm(rs, rowNum));
 
     }
@@ -143,7 +145,20 @@ public class FilmDbStorage  implements FilmStorage {
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("duration"))
                 .mpa(mpa)
-                .genres(new ArrayList<>())
+                .genres(getFilmGenres(resultSet.getLong("film_id")))
+                .build();
+    }
+    public List<Genre> getFilmGenres(Long filmId) {
+        String sql = "SELECT DISTINCT g.genre_id, g.name_genre " +
+                "FROM genres AS g " +
+                "RIGHT JOIN films_genres AS fg ON g.genre_id = fg.genres_id " +
+                "WHERE fg.film_id = ?;";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> parseGenre(rs, rowNum), filmId);
+    }
+    private Genre parseGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return Genre.builder()
+                .id(resultSet.getLong("genre_id"))
+                .name(resultSet.getString("name_genre"))
                 .build();
     }
 

@@ -48,15 +48,8 @@ public class FilmService {
 
     public Film updateFilm (Film film) {
         if (filmStorage.isFilmExist(film.getId())) {
-            System.out.println("update");
             validate(film);
-            System.out.println("rate переменной - " + film.getRate());
-            System.out.println("rate переменной - " +filmStorage.get(film.getId()).getRate());
-
             filmStorage.update(film);
-            System.out.println("UPDATE");
-            System.out.println("rate переменной - " + film.getRate());
-            System.out.println("rate переменной - " +filmStorage.get(film.getId()).getRate());
             genreService.addFilmGenres(film.getId(), film.getGenres());
             return getFilm(film.getId());
         } else {
