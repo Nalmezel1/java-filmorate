@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class UserDbStorage implements UserStorage {
@@ -42,7 +43,7 @@ public class UserDbStorage implements UserStorage {
             statement.setDate(4, Date.valueOf(user.getBirthday()));
             return statement;
         }, keyHolder);
-        user.setId(keyHolder.getKey().longValue());
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return user;
     }
 

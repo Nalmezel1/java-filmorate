@@ -29,7 +29,7 @@ create table IF NOT EXISTS FILMS
 );
 create table IF NOT EXISTS USERS
 (
-    user_id      long auto_increment primary key,
+    user_id      long PRIMARY KEY auto_increment,
     email    varchar not null unique,
     login    varchar not null,
     name     varchar not null,

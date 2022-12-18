@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class FilmDbStorage  implements FilmStorage {
@@ -49,15 +51,36 @@ public class FilmDbStorage  implements FilmStorage {
     @Override
     public Film update(Film film) {
 
-        System.out.println("ate  момент заполнения БД - " + film.getRate());
-
-        String sql = "UPDATE films " +
+        String sql1 = "UPDATE films " +
                 "SET film_name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? , rate = ? " +
                 "WHERE film_id = ?;";
-        jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
+        jdbcTemplate.update(sql1, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), film.getRate(), film.getId());
 
+        String sql2 = "DELETE FROM FILMS_GENRES WHERE FILM_ID = ?;";
+        jdbcTemplate.update(sql2, film.getId());
+
+        if (film.getGenres() != null) {
+            String sql3 = "SELECT DISTINCT g.genre_id, g.name_genre " +
+                    "FROM genres AS g " +
+                    "RIGHT JOIN films_genres AS fg ON g.genre_id = fg.genres_id " +
+                    "WHERE fg.film_id = ?;";
+            List<Integer> genresIds = jdbcTemplate.query(sql3,
+                    this::parseGenreIds, film.getId());
+
+            film.getGenres().stream()
+                    .map(Genre::getId)
+                    .filter(id -> !genresIds.contains(id))
+                    .collect(Collectors.toSet())
+                    .forEach(genreId -> {
+                        jdbcTemplate.update("INSERT INTO FILMS_GENRES(film_id, genres_id)\n" +
+                                "VALUES (?, ?)", film.getId(), genreId);
+                    });
+        }
         return get(film.getId());
+    }
+    private Integer parseGenreIds(ResultSet rs, int rowNum) throws SQLException {
+        return rs.getInt("genre_id");
     }
 
     @Override
@@ -79,7 +102,7 @@ public class FilmDbStorage  implements FilmStorage {
     @Override
     public List<Film> getAll() {
         String sql =
-                "SELECT f.film_id, f.film_name, f.description, f.release_date, f.duration,f.rate, f.Mpa_id, m.rating_name " +
+                "SELECT f.film_id, f.film_name, f.description, f.release_date, f.duration,f.rate, f.Mpa_id, m.rating_name,STRING_AGG(CONCAT(fg.genres_id, '_', g.name_genre), ', ') AS GENRES  " +
                         "FROM films f " +
                         "LEFT JOIN mpa_rating AS m ON m.mpa_id = f.Mpa_id " +
                         "LEFT JOIN films_genres AS fg ON f.film_id = fg.film_id " +
