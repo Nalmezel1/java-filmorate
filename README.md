@@ -2,4 +2,4 @@
 Template repository for Filmorate project.
 
 
-Ссылка на схему БД - https://app.quickdatabasediagrams.com/#/
+Ссылка на схему БД - https://app.quickdatabasediagrams.com/#/d/vB9M3m
