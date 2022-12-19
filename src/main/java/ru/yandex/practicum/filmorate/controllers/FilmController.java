@@ -1,5 +1,4 @@
 package ru.yandex.practicum.filmorate.controllers;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -8,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.LikesService;
 
 
 import javax.validation.Valid;
@@ -21,16 +21,17 @@ import java.util.List;
 @RequestMapping("/films")
 public class FilmController {
 
-
-
     private final FilmService filmService;
+    private final LikesService likesService;
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(FilmService filmService, LikesService likesService) {
         this.filmService = filmService;
+        this.likesService = likesService;
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film newFilm) throws ValidationException {
+    public Film create(@Valid @RequestBody Film newFilm)  {
+        System.out.println(newFilm);
         return filmService.createFilm(newFilm);
     }
 
@@ -40,6 +41,7 @@ public class FilmController {
     }
     @GetMapping("/{id}")
     public Film getById(@PathVariable Long id) {
+
         return filmService.getFilm(id);
     }
 
@@ -59,12 +61,12 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public  void addLike(@PathVariable Long id, @PathVariable Long userId) throws ValidationException {
-        filmService.addLike(id, userId);
+        likesService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public  void delLike(@PathVariable Long id, @PathVariable Long userId) throws ValidationException {
-        filmService.removeLike(id, userId);
+        likesService.removeLike(id, userId);
     }
 
 }

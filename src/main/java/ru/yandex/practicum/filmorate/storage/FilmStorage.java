@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -14,4 +14,11 @@ public interface FilmStorage {
         void remove(Long id);
         Film get(Long id);
         List<Film> getAll();
+
+
+        List<Film> getPopularFilms(int count);
+
+        boolean isFilmExist(Long id);
+
+        boolean iiLikeExist(Long filmId, Long userId);
 }

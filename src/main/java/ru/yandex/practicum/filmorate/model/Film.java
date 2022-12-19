@@ -1,15 +1,24 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.validation.Constraint;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
-public class Film extends AbstractModel{
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Film{
+    private Long id;
     @NotNull
     @NotBlank
     private String name;
@@ -21,14 +30,9 @@ public class Film extends AbstractModel{
     @Positive(message = "родолжительность фильма должна быть положительной")
     private int duration;
 
-    @JsonIgnore
-    private Set<Long> likes = new HashSet<>();
+    private int rate;
+    private List<Genre> genres;
+    private Mpa mpa;
 
-    public void addLike(Long userId) {
-        likes.add(userId);
-    }
-    public void removeLike(Long userId) {
-        likes.remove(userId);
-    }
 
 }
